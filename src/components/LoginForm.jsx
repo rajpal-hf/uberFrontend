@@ -18,14 +18,14 @@ export default function LoginForm() {
 
 
 	const countries = [
-		{ code: '+1', name: 'United States', flag: '🇺🇸' },
-		{ code: '+44', name: 'United Kingdom', flag: '🇬🇧' },
-		{ code: '+91', name: 'India', flag: '🇮🇳' },
-		{ code: '+86', name: 'China', flag: '🇨🇳' },
-		{ code: '+81', name: 'Japan', flag: '🇯🇵' },
-		{ code: '+49', name: 'Germany', flag: '🇩🇪' },
-		{ code: '+33', name: 'France', flag: '🇫🇷' },
-		{ code: '+61', name: 'Australia', flag: '🇦🇺' },
+		{ code: '+1', name: 'United States', flag: '🇺🇸'},
+		{ code: '+44', name: 'United Kingdom', flag: '🇬🇧'},
+		{ code: '+91', name: 'India', flag: '🇮🇳'},
+		{ code: '+86', name: 'China', flag: '🇨🇳'},
+		{ code: '+81', name: 'Japan', flag: '🇯🇵'},
+		{ code: '+49', name: 'Germany', flag: '🇩🇪'},
+		{ code: '+33', name: 'France', flag: '🇫🇷'},
+		{ code: '+61', name: 'Australia', flag: '🇦🇺'},
 	];
 
 
@@ -90,7 +90,7 @@ export default function LoginForm() {
 
 			login(data.token, data.role);
 
-			// 2️⃣ Navigate based on role
+			//  Navigate based on role
 			if (data.role === "rider") {
 				navigate("/rider-home");
 			} else if (data.role === "driver") {
