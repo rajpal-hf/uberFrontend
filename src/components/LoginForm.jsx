@@ -82,7 +82,10 @@ export default function LoginForm() {
 			const { data } = await axios.post("http://localhost:3000/auth/login", {
 				phone: countryCode + phoneNumber,
 				otp: otp.join(""),
-			});
+			},
+				{ withCredentials: true }
+			
+			);
 
 			if (!data.success) {
 				return alert(data.message);
