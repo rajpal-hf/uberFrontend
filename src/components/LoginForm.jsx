@@ -53,6 +53,7 @@ export default function LoginForm() {
 				return { success: false, message: data.message };
 			}
 
+			
 			return { success: true };
 		} catch (error) {
 			console.error(error);
@@ -95,7 +96,7 @@ export default function LoginForm() {
 
 			//  Navigate based on role
 			if (data.role === "rider") {
-				navigate("/rider-home");
+				navigate("/	fare-calculate");
 			} else if (data.role === "driver") {
 				navigate("/driver-home");
 			}

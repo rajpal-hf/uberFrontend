@@ -252,7 +252,7 @@ const DriverHome = () => {
 				headers: {
 					'Content-Type': 'application/json',
 					'Authorization': `Bearer ${DRIVER_TOKEN}`
-				},
+				},																											
 				body: JSON.stringify({
 					driverId: DRIVER_ID,
 					driverLocation: driverLocation
