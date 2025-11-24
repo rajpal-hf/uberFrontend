@@ -64,12 +64,13 @@ export default function RideFareCalculator() {
 		try {
 			const res = await requestRide(mode);
 
-			console.log("resssssssssssss", res);
 			if (!res.success) {
 				console.log("res", res);
 				return 
 			}
-			navigate(`/request/${res.ride._id}`, {
+
+			console.log("resssssssssssssssss idddddddddddddddddd", res.ride._id);
+			navigate(`/searching-driver/${res.ride._id}`, {
 				state: {
 					rideId: res.rideId,
 				},
@@ -231,7 +232,7 @@ export default function RideFareCalculator() {
 
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+		<div className="min-h-screen bg-linear-to-r from-blue-50 to-indigo-100 p-4">
 			<div className="max-w-2xl mx-auto">
 				<div className="bg-white rounded-2xl shadow-xl p-6 mt-8">
 					<h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
@@ -375,7 +376,7 @@ export default function RideFareCalculator() {
 							{Object.keys(result.estimatedFare).map((mode) => (
 								<div
 									key={mode}
-									onClick={() => goToRequest(mode)}
+									onClick={() => gotoSearch(mode)}
 									className="bg-white border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-indigo-600 transition"
 								>
 									<div className="flex justify-between items-center">

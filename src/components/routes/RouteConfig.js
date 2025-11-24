@@ -1,6 +1,8 @@
 
+import LoadingPage from "../common/LoadingPage";
+import DriverPanel from "../driver/DriverPannel";
 import DriverHome from "../DriverFound";
-import RequestRide from "../rider/RequestRide";
+import DriverInfoPage from "../rider/DriverInfoPage";
 import RideFareCalculator from "../rider/RideFareCalculater";
 
 
@@ -9,14 +11,15 @@ export const routes = [
 		role: "rider",
 		children: [
 			{ path: "/fare-calculate", element: RideFareCalculator },
-			{ path: "/request/:id", element: RequestRide },
+			{ path: "/searching-driver/:id", element: LoadingPage },
+			{ path: "/driver-info/:id", element: DriverInfoPage },
 		]
 	},
 
 	{
 		role: "driver",
 		children: [
-			{ path: "/driver-home", element: DriverHome  },
+			{ path: "/driver-home", element: DriverPanel},
 		]
 	},
 
