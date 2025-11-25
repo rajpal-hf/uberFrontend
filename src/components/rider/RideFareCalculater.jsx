@@ -376,7 +376,7 @@ export default function RideFareCalculator() {
 							{Object.keys(result.estimatedFare).map((mode) => (
 								<div
 									key={mode}
-									onClick={() => gotoSearch(mode)}
+									onClick={() => goToRequest(mode)}
 									className="bg-white border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-indigo-600 transition"
 								>
 									<div className="flex justify-between items-center">

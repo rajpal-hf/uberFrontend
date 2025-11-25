@@ -3,6 +3,7 @@ import { MapPin, Phone, User, Navigation, CreditCard, Calendar } from 'lucide-re
 import LoadingPage from '../common/LoadingPage';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { getSocket } from '../../utils/webSocket/ws';
 
 export default function DriverInfoPage() {
 	const [ride, setRideData] = useState(null);
@@ -13,13 +14,48 @@ export default function DriverInfoPage() {
 	const rideId = id || location.pathname.split("/")[-1];
 	const location = useLocation()
 
+
 	
-	
-	console.log("rideId ", rideId)
-	console.log("location ", location	)
-	console.log("location state ", location.state?.rideId)
 
 	// Simulated API call - replace with your actual endpoint
+
+
+
+	useEffect(() => {
+		const socket = getSocket();
+		if (!socket) return;
+
+		socket.onmessage = (msg) => {
+			const { event, data } = JSON.parse(msg.data);
+			
+			switch (event) {
+				case "ride:started":
+					console.log("Ride started!", data);
+					break;
+
+				case "ride:location":
+					console.log("Driver live location: ", data);
+					// You can update map / marker here
+					break;
+
+				case "ride:cancelled":
+					alert("Driver cancelled the ride.");
+					navigate("/fare-calculate");
+					break;
+
+				case "ride:completed":
+					console.log("Ride completed!", data);
+					navigate(`/payment/${rideId}`, {
+						state: { payment: data.payment }
+					});
+					break;
+
+				default:
+					break;
+			}
+		};
+	}, []);
+
 	useEffect(() => {
 		const fetchRideData = async () => {
 			try {

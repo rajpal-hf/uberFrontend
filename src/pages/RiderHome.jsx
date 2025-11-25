@@ -17,11 +17,6 @@ export default function UberRider() {
 
 
 
-	
-		
-	
-
-
 	const [showMenu, setShowMenu] = useState(false);
 	const [step, setStep] = useState("home");
 	const [pickup, setPickup] = useState("");

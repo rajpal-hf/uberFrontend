@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Clock, DollarSign, User, Navigation, Phone, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import axios from 'axios';
+import { useNavigate, useNavigation } from 'react-router-dom';
 
 export default function DriverPanel() {
   const [isOnline, setIsOnline] = useState(false);
@@ -13,108 +15,10 @@ export default function DriverPanel() {
 	const [driverLocation, setDriverLocation] = useState(null);			
 	const [gettingLocation, setGettingLocation] = useState(null);
 
+	const navigate = useNavigate()
+
   // WebSocket connection
-  const connectWebSocket = () => {
-    const token = localStorage.getItem('token'); 
-    if (!token) {
-      setError('Authentication token not found');
-      return;
-    }
-
-    try {
-      // Connect to WebSocket with token
-      const ws = new WebSocket(`ws://localhost:3000/ws?token=${token}`);
-      
-      ws.onopen = () => {
-        console.log('WebSocket Connected');
-        setWsConnected(true);
-        setError(null);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          console.log('WebSocket message:', message);
-
-          switch (message.event) {
-            case 'registered':
-              console.log('Registered with userId:', message.userId);
-              break;
-
-            case 'new_ride':
-              // Add new ride to the list
-              if (message.ride && message.ride.rideStatus === 'pending') {
-                setRideRequests(prev => {
-                  // Check if ride already exists
-                  const exists = prev.some(r => r._id === message.ride._id);
-                  if (exists) return prev;
-                  return [message.ride, ...prev];
-                });
-                
-                // Show notification
-                if ('Notification' in window && Notification.permission === 'granted') {
-                  new Notification('New Ride Request!', {
-                    body: `Pickup: ${message.ride.pickupLocation.address}`,
-                    icon: '/notification-icon.png'
-                  });
-                }
-              }
-              break;
-
-            case 'ride_accepted':
-              // Remove accepted ride from list
-              setRideRequests(prev => prev.filter(r => r._id !== message.rideId));
-              break;
-
-            case 'ride_cancelled':
-              // Remove cancelled ride from list
-              setRideRequests(prev => prev.filter(r => r._id !== message.rideId));
-              break;
-
-            default:
-              console.log('Unknown event:', message.event);
-          }
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setWsConnected(false);
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        setWsConnected(false);
-        
-        // Attempt to reconnect after 3 seconds
-        reconnectTimeoutRef.current = setTimeout(() => {
-          if (isOnline) {
-            console.log('Attempting to reconnect WebSocket...');
-            connectWebSocket();
-          }
-        }, 3000);
-      };
-
-      wsRef.current = ws;
-    } catch (err) {
-      console.error('WebSocket connection error:', err);
-      setError('Failed to connect to server');
-    }
-  };
-
-  // Disconnect WebSocket
-  const disconnectWebSocket = () => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-    }
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    setWsConnected(false);
-  };
+ 
 
   // Send driver location update (optional - for tracking)
   const sendLocationUpdate = (location) => {
@@ -204,7 +108,7 @@ export default function DriverPanel() {
     } else {
       // Going offline
       setRideRequests([]);
-      disconnectWebSocket();
+      // disconnectWebSocket();
     }
 	}; 
 
@@ -242,45 +146,65 @@ export default function DriverPanel() {
 	};
 
   // Handle accepting a ride via WebSocket
-  const handleAcceptRide = async (rideId) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      // Send accept via WebSocket
-      wsRef.current.send(JSON.stringify({
-        event: 'accept_ride',
-        rideId: rideId
-      }));
+  // const handleAcceptRide = async (rideId) => {
+  //   if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+  //     // Send accept via WebSocket
+  //     wsRef.current.send(JSON.stringify({
+  //       event: 'accept_ride',
+  //       rideId: rideId
+  //     }));
       
-			// Optimistically remove from list
-			try {
-				getCurrentLocation()
-				console.log("location : ", 
-				);
-			} catch (error) {
-				console.log(error)
-				console.error("Error updating Location :", error);
-			}
+	// 		// Optimistically remove from list
+	// 		try {
+	// 			// getCurrentLocation()
+	// 			console.log("location : ", );
+	// 		} catch (error) {
+	// 			console.log(error)
+	// 			console.error("Error updating Location :", error);
+	// 		}
 
 
-      setRideRequests(prev => prev.filter(ride => ride._id !== rideId));
+  //     setRideRequests(prev => prev.filter(ride => ride._id !== rideId));
       
-			// You can also make an API call as backup
+	// 		// You can also make an API call as backup
 			
+	// 		try {
+	// 			await axios.post(`http://localhost:3000/ride/accept/${rideId}`,
+	// 				{driverLocation},
+	// 				{ withCredentials: true });
+	// 			alert('Ride accepted! Navigate to pickup location.');
+	// 			navigate(`/pickup-navigation/${rideId}`,
+	// 				state = {
+	// 					rideId : rideId
+	// 				}
+	// 			);
+  //     } catch (err) {
+  //       console.error('Error accepting ride:', err);
+  //     }
+  //   } else {
+  //     alert('WebSocket not connected. Please try again.');
+  //   }
+  // };
+
+	const handleAcceptRide = async (rideId) => {
+		
+			// setRideRequests(prev => prev.filter(ride => ride._id !== rideId));
+
+			// You can also make an API call as backup
+
 			try {
-				await fetch(`http://localhost:3000/ride/accept/${rideId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-        });
-        alert('Ride accepted! Navigate to pickup location.');
-      } catch (err) {
-        console.error('Error accepting ride:', err);
-      }
-    } else {
-      alert('WebSocket not connected. Please try again.');
-    }
-  };
+				await axios.post(`http://localhost:3000/ride/accept/${rideId}`,
+					{ driverLocation },
+					{ withCredentials: true });
+				alert('Ride accepted! Navigate to pickup location.');
+				navigate(`/pickup-navigation/${rideId}`
+				);
+			} catch (err) {
+				console.error('Error accepting ride:', err);
+			}
+		
+	};
+
 
   const handleRejectRide = (rideId) => {
     try {
@@ -310,7 +234,7 @@ export default function DriverPanel() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      disconnectWebSocket();
+      // disconnectWebSocket();
     };
   }, []);
 
@@ -511,7 +435,7 @@ export default function DriverPanel() {
           </>
         )}
       </div>
-			<style >{`
+			<style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

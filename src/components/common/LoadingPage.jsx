@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { getSocket } from '../../utils/webSocket/ws';
 
 
 export default function LoadingPage() {
@@ -36,8 +37,29 @@ export default function LoadingPage() {
 		}
 	}, [isLoading]);
 
+
+	useEffect(() => {
+		const socket = getSocket();
+
+		if (!socket) return;
+
+		socket.onmessage = (msg) => {
+			const { event, data } = JSON.parse(msg.data);
+
+			if (event === "ride:accepted") {
+				console.log("Driver accepted!", data);
+
+				navigate(`/driver-info/${data._id}`, {
+					state: { rideId: data._id }
+				});
+			}
+		};
+	}, []);
+
+
 	const checkDriverFound = async () => {
 		try {
+			console.log("code break after this ");
 			const { data } = await axios.get(
 				`http://localhost:3000/ride/driver/${rideId}`,
 				{ withCredentials: true }
@@ -97,8 +119,6 @@ export default function LoadingPage() {
 				<p className="text-gray-400">Please wait while we load ride details</p>
 			</div>
 
-
-		
 				<button
 					onClick={handleCancel}
 					className="w- flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg font-medium hover:bg-red-100 transition-colors border border-red-200"

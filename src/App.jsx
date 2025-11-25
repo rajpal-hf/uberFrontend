@@ -4,10 +4,19 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import RoleRoute from "./components/routes/RoleRoutes";
 import { routes } from "./components/routes/RouteConfig";
+import { connectWS } from './utils/webSocket/ws';
+import { useEffect } from 'react';
+
 
 
 
 function App() {
+
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+		if (token) connectWS(token);
+	}, []);
+
 	return (
 
 		<Routes>
