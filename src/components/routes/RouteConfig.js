@@ -10,10 +10,10 @@ import RideFareCalculator from "../rider/RideFareCalculater";
 
 
 export const routes = [
-	{
+	{ 
 		role: "rider",
 		children: [
-			{ path: "/fare-calculate", element: RideFareCalculator },
+			{ path: "/rider-home", element: RideFareCalculator },
 			{ path: "/searching-driver/:id", element: LoadingPage },
 			{ path: "/driver-info/:id", element: DriverInfoPage },
 		]

@@ -34,7 +34,6 @@ const DriverHome = () => {
 			const ws = new WebSocket(`ws://localhost:3000/ws?token=${DRIVER_TOKEN}`);
 
 			ws.onopen = () => {
-				console.log('WebSocket Connected');
 				setIsConnected(true);
 				ws.send(JSON.stringify({ event: 'register' }));
 				showNotification('Connected to server', 'success');
@@ -51,7 +50,6 @@ const DriverHome = () => {
 			};
 
 			ws.onclose = () => {
-				console.log('WebSocket Disconnected');
 				setIsConnected(false);
 				showNotification('Disconnected from server', 'error');
 				// Attempt to reconnect after 3 seconds
@@ -66,17 +64,14 @@ const DriverHome = () => {
 	};
 
 	const handleWebSocketMessage = (message) => {
-		console.log('Received message:', message);
 
 		switch (message.event) {
 			case 'registered':
-				console.log('Successfully registered');
 				break;
 
 			case 'new_ride':
 				// Add new ride to the list if not already accepted
 				if (!currentRide) {
-					console.log('New ride request:', message.data);
 					setRides(prev => {
 						const exists = prev.some(r => r.rideId === message.data.rideId);
 						if (!exists) {
@@ -89,7 +84,6 @@ const DriverHome = () => {
 				break;
 
 			case 'ride_taken':
-				console.log('Ride taken:', message.data);
 				// Remove ride from list if another driver accepted it
 				setRides(prev => prev.filter(r => r.rideId !== message.data.rideId));
 				if (currentRide?.rideId === message.data.rideId && currentRide.status === 'pending') {
@@ -99,12 +93,10 @@ const DriverHome = () => {
 				break;
 
 			case 'ride_accepted':
-				console.log('Ride accepted nnjnjnjnjnjnjn:', message.data);
 				showNotification('Ride accepted successfully!', 'success');
 				break;
 
 			default:
-				console.log('Unknown event:', message.event);
 		}
 	};
 

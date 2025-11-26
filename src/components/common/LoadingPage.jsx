@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { getSocket } from '../../utils/webSocket/ws';
+import { connectWS } from '../../utils/webSocket/ws';
 
 
 export default function LoadingPage() {
@@ -38,34 +38,71 @@ export default function LoadingPage() {
 	}, [isLoading]);
 
 
-	useEffect(() => {
-		const socket = getSocket();
 
-		if (!socket) return;
+		useEffect(() => {
+			const token = localStorage.getItem("token");
+	
+			connectWS(token, (event, data) => {
+	
+				if (event === "ride:started") {
+					
+				}
+				if (event === "ride:accepted") {
+					navigate(`/driver-info/${data._id}`)
+				}
+	
+				if (event === "ride:cancelled") {
+					alert("Driver cancelled the ride.");
+					navigate("/rider-home");
+				}
+				if (event === "ride:completed") {
+					navigate(`/payment/${rideId}`, {
+						state: { payment: data.payment }
+					});
+				}
+			});
+	
+	
+		}, []);
 
-		socket.onmessage = (msg) => {
-			const { event, data } = JSON.parse(msg.data);
+	// useEffect(() => {
+	// 	const socket = getSocket();
 
-			if (event === "ride:accepted") {
-				console.log("Driver accepted!", data);
+	// 	if (!socket) return;
 
-				navigate(`/driver-info/${data._id}`, {
-					state: { rideId: data._id }
-				});
-			}
-		};
-	}, []);
+	// 	const handleMessage = (msg) => {
+	// 		const { event, data } = JSON.parse(msg.data);
+
+	// 		if (event === "ride:accepted") {
+	// 			console.log("Driver accepted!", data);
+
+	// 			navigate(`/driver-info/${data._id}`, {
+	// 				state: { rideId: data._id }
+	// 			});
+	// 		}
+
+	// 		if (event === "ride:cancelled") {
+	// 			console.log("Ride cancelled!", data);
+	// 			navigate('/rider-home');
+	// 		}
+	// 	};
+
+	// 	socket.addEventListener("message", handleMessage);
+
+	// 	return () => {
+	// 		socket.removeEventListener("message", handleMessage);
+	// 	};
+	// }, []);
+
 
 
 	const checkDriverFound = async () => {
 		try {
-			console.log("code break after this ");
 			const { data } = await axios.get(
 				`http://localhost:3000/ride/driver/${rideId}`,
 				{ withCredentials: true }
 			);
 
-			console.log("data while sending request", data);
 
 			if (data.success && data.ride) {
 				navigate(`/driver-info/${rideId}`, 
@@ -99,7 +136,7 @@ export default function LoadingPage() {
 			setProgress(0);
 
 			// optional redirect
-			navigate('/fare-calculate');
+			navigate('/rider-home');
 		} catch (error) {
 			console.log(error);
 		}

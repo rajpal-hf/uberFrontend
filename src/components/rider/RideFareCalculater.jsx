@@ -35,6 +35,8 @@ export default function RideFareCalculator() {
 
 	const [gettingLocation, setGettingLocation] = useState(null);
 
+	
+
 
 	const requestRide = async (mode) => {
 		try {
@@ -48,11 +50,9 @@ export default function RideFareCalculator() {
 				},
 				{withCredentials: true}
 			)
-			console.log("data while sending request", data);	
 			return data;
 		}
 		catch(error) {
-			console.log(error);
 			console.error("Error fetching token:", error);
 			return
 		}
@@ -69,7 +69,6 @@ export default function RideFareCalculator() {
 				return 
 			}
 
-			console.log("resssssssssssssssss idddddddddddddddddd", res.ride._id);
 			navigate(`/searching-driver/${res.ride._id}`, {
 				state: {
 					rideId: res.rideId,
@@ -157,7 +156,7 @@ export default function RideFareCalculator() {
 			if (isPickup) setPickupSuggestions(mapped);
 			else setDropoffSuggestions(mapped);
 		} catch (e) {
-			console.log("Search error:", e);
+			console.error("Search error:", e);
 		}
 	};
 
@@ -206,14 +205,10 @@ export default function RideFareCalculator() {
 			return;
 		}
 
-		console.log("dropoffLocation", dropoffLocation);
-
 		setLoading(true);
 		setError("");
 
-		console.log("pickupLocation", pickupLocation);
 		try {
-			console.log("pickupLocation", pickupLocation);	
 			const res = await axios.post("http://localhost:3000/ride/ride-fare", {
 			pickupLocation,
 			dropoffLocation
@@ -221,7 +216,6 @@ export default function RideFareCalculator() {
 				{withCredentials: true}
 			)
 
-			console.log("res", res);
 			setResult(res.data);
 		} catch (err) {
 			setError("Failed to calculate fare. Please try again.");

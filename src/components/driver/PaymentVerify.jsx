@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { CheckCircle, Smartphone, Wallet, Loader2, Camera } from "lucide-react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 export default function PaymentModePage() {
 	const [mode, setMode] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [receiptImage, setReceiptImage] = useState(null);
+	const { rideId } = useParams()
 
-	const rideId = "RID12345"; // dynamically from props or params
-
-	// -------------------------
 	// Auto Verify (Online)
-	// -------------------------
 	const handleOnlineVerify = async () => {
 		setLoading(true);
 		try {
@@ -23,9 +21,7 @@ export default function PaymentModePage() {
 		setLoading(false);
 	};
 
-	// -------------------------
 	// Manual Verify (Offline)
-	// -------------------------
 	const handleOfflineVerify = async () => {
 		setLoading(true);
 

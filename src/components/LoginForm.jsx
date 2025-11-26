@@ -38,7 +38,6 @@ export default function LoginForm() {
 		try {
 			setStep("otp");
 
-			console.log(import.meta.env.BASE_URL);
 
 
 			const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"; 
@@ -96,7 +95,7 @@ export default function LoginForm() {
 
 			//  Navigate based on role
 			if (data.role === "rider") {
-				navigate("/	fare-calculate");
+				navigate("/rider-home");
 			} else if (data.role === "driver") {
 				navigate("/driver-home");
 			}

@@ -3,7 +3,7 @@ import { MapPin, Phone, User, Navigation, CreditCard, Calendar } from 'lucide-re
 import LoadingPage from '../common/LoadingPage';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { getSocket } from '../../utils/webSocket/ws';
+import { connectWS, getSocket } from '../../utils/webSocket/ws';
 
 export default function DriverInfoPage() {
 	const [ride, setRideData] = useState(null);
@@ -17,43 +17,33 @@ export default function DriverInfoPage() {
 
 	
 
-	// Simulated API call - replace with your actual endpoint
 
 
 
 	useEffect(() => {
-		const socket = getSocket();
-		if (!socket) return;
+		const token = localStorage.getItem("token");
 
-		socket.onmessage = (msg) => {
-			const { event, data } = JSON.parse(msg.data);
-			
-			switch (event) {
-				case "ride:started":
-					console.log("Ride started!", data);
-					break;
+		connectWS(token, (event, data) => {
 
-				case "ride:location":
-					console.log("Driver live location: ", data);
-					// You can update map / marker here
-					break;
-
-				case "ride:cancelled":
-					alert("Driver cancelled the ride.");
-					navigate("/fare-calculate");
-					break;
-
-				case "ride:completed":
-					console.log("Ride completed!", data);
-					navigate(`/payment/${rideId}`, {
-						state: { payment: data.payment }
-					});
-					break;
-
-				default:
-					break;
+			if (event === "ride:started") {
+				
 			}
-		};
+			if (event === "ride:accepted") {
+				navigate(`/driver-info/${data._id}`)
+			}
+
+			if (event === "ride:cancelled") {
+				alert("Driver cancelled the ride.");
+				navigate("/rider-home");
+			}
+			if (event === "ride:completed") {
+				navigate(`/payment/${rideId}`, {
+					state: { payment: data.payment }
+				});
+			}
+		});
+
+
 	}, []);
 
 	useEffect(() => {
@@ -62,7 +52,6 @@ export default function DriverInfoPage() {
 				setLoading(true);
 				const { data } = await axios.get(`http://localhost:3000/ride/driver/${rideId}`, {withCredentials: true});
 
-				console.log("data while sending request", data) 
 				
 
 				setRideData(data.ride);
@@ -81,10 +70,17 @@ export default function DriverInfoPage() {
 
 
 			setLoading(false);
+			const ws = getSocket();
+					if (!ws || ws.readyState !== WebSocket.OPEN) return;
 			
-			navigate('/fare-calculate');
+					ws.send(JSON.stringify({
+						event: "ride:cancel",
+						data: {
+							rideId,
+						}
+					}));
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 	} 
 

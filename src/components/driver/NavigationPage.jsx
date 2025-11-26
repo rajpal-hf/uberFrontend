@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigation, MapPin, User, Clock, Phone } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { getSocket } from '../../utils/webSocket/ws';
 
 export default function PickupNavigation() {
 	const [currentTime, setCurrentTime] = useState(new Date());
@@ -21,7 +22,7 @@ export default function PickupNavigation() {
 				});
 
 
-				if (data.success) {
+				if (data.success) {	
 					setRideData(data);
 					// Calculate ETA based on distance (rough estimate: 30 km/h average speed)
 					const estimatedMinutes = (parseFloat(data.pickupDistance) / 30) * 60;
@@ -51,11 +52,21 @@ export default function PickupNavigation() {
 	const startRideHandler = () => {
 		try {
 			const { data } = axios.patch(`http://localhost:3000/ride/start/${id}`, {}, { withCredentials: true });
-			console.log("data while start ride", data);
-			navigate(`/active-rid						e/${id}`);
+
+			const ws = getSocket()
+			if (!ws || ws.readyState !== WebSocket.OPEN) return;
+			ws.send(JSON.stringify({
+				event: "ride:start",
+				data: {
+					rideId: id,
+				}
+			}))
+
+			navigate(`/active-ride/${id}`);
+	
 			alert('Ride started!');
 		} catch (error) {
-			console.log("error in start ride", error);
+			console.error("error in start ride", error);
 		}
 	}
 	

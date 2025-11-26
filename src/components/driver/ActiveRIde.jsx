@@ -21,8 +21,7 @@ export default function ActiveRidePage() {
 				const {data} = await axios.get(`http://localhost:3000/ride/active-ride/${id}`, {
 					withCredentials: true	
 				});
-
-				console.log("data while active ride", data);
+				
 				if (data.success) {
 					setRideData(data);
 					setRideDuration(data.elapsedMinutes * 60); // Convert to seconds
@@ -82,26 +81,6 @@ export default function ActiveRidePage() {
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	};
 
-	// const handleEndRide = () => {
-
-	// 	if (window.confirm('Are you sure you want to end this ride?')) {
-	// 		// Call API to end ride
-
-	// 		const { data } = axios.patch(`http://localhost:3000/ride/complete/${id}`, {}, {
-	// 			withCredentials : true
-	// 		})
-
-	// 		console.log("data while end ride", data);
-
-	// 		alert('Ride completed! Redirecting to summary...');
-	// 		// Navigate to ride summary/payment page
-	// 		navigate('/payment-verify', {
-	// 			state: {
-	// 				rideId: id
-	// 			}
-	// 		})
-	// 	}
-	// };
 
 
 	const handleEndRide = async () => {
@@ -132,7 +111,6 @@ export default function ActiveRidePage() {
 				}
 			);
 
-			console.log("Ride completion response:", data);
 
 			if (data.success) {
 				// 3. Redirect with combined data
