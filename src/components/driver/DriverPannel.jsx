@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Clock, DollarSign, User, Navigation, Phone, RefreshCw } from 'lucide-react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { connectWS, getSocket } from '../../utils/webSocket/ws';
 
@@ -34,8 +33,10 @@ export default function DriverPanel() {
 		const token = localStorage.getItem("token");
 
 		const socket = connectWS(token, (event, data) => {
+			
 
 			if (event === "new:ride") {
+				console.log("new:ride FE - Driver", data);
 				setRideRequests(prev => [data,...prev ]);
 			}
 			if (event === "ride:cancelled") {
@@ -45,13 +46,17 @@ export default function DriverPanel() {
 			if (event === "ride:accepted") {
 				navigate(`/pickup-navigation/${data._id}`);
 			}
+			if (event === "ride:completed") {
+				console.log("ride completeeeeeedd", data);
+				navigate('/payment-verify', { state: { data } });
+			}
 		});
 
 		return () => {
-			if (socket) socket.close();
+			console.log("Driver Panel cleanup — socket NOT closed");
 		};
 
-	}, [isOnline, navigate]);
+	}, [isOnline]);
 
 
 
@@ -131,8 +136,6 @@ export default function DriverPanel() {
 
 
 	const handleAcceptRide = async (rideId) => {
-		
-
 		
 		if (!driverLocation) {
 			await new Promise((resolve) => {

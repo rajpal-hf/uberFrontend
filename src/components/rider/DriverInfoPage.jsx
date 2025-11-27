@@ -21,32 +21,6 @@ export default function DriverInfoPage() {
 
 
 	useEffect(() => {
-		const token = localStorage.getItem("token");
-
-		connectWS(token, (event, data) => {
-
-			if (event === "ride:started") {
-				
-			}
-			if (event === "ride:accepted") {
-				navigate(`/driver-info/${data._id}`)
-			}
-
-			if (event === "ride:cancelled") {
-				alert("Driver cancelled the ride.");
-				navigate("/rider-home");
-			}
-			if (event === "ride:completed") {
-				navigate(`/payment/${rideId}`, {
-					state: { payment: data.payment }
-				});
-			}
-		});
-
-
-	}, []);
-
-	useEffect(() => {
 		const fetchRideData = async () => {
 			try {
 				setLoading(true);
@@ -66,9 +40,8 @@ export default function DriverInfoPage() {
 	}, []);
 	const cancelRideHandler = async() => {
 		try {
-			await axios.patch(`http://localhost:3000/ride/cancel/${rideId}`, {}, { withCredentials: true });
-
-
+			// await axios.patch(`http://localhost:3000/ride/cancel/${rideId}`, {}, { withCredentials: true })
+			
 			setLoading(false);
 			const ws = getSocket();
 					if (!ws || ws.readyState !== WebSocket.OPEN) return;

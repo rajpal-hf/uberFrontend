@@ -4,9 +4,10 @@ import ActiveRidePage from "../driver/ActiveRIde";
 import DriverPanel from "../driver/DriverPannel";
 import PickupNavigation from "../driver/NavigationPage";
 import PaymentVerify from "../driver/PaymentVerify";
-import DriverHome from "../DriverFound";
 import DriverInfoPage from "../rider/DriverInfoPage";
 import RideFareCalculator from "../rider/RideFareCalculater";
+import RideOngoingPage from "../rider/RideOnGoing";
+import RidePayment from "../rider/RidePayment";
 
 
 export const routes = [
@@ -16,6 +17,8 @@ export const routes = [
 			{ path: "/rider-home", element: RideFareCalculator },
 			{ path: "/searching-driver/:id", element: LoadingPage },
 			{ path: "/driver-info/:id", element: DriverInfoPage },
+			{ path: "/on-going-ride/:id", element: RideOngoingPage },
+			{ path: "/checkout/:id", element: RidePayment },
 		]
 	},
 

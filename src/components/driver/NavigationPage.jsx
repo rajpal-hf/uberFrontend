@@ -51,8 +51,6 @@ export default function PickupNavigation() {
 
 	const startRideHandler = () => {
 		try {
-			const { data } = axios.patch(`http://localhost:3000/ride/start/${id}`, {}, { withCredentials: true });
-
 			const ws = getSocket()
 			if (!ws || ws.readyState !== WebSocket.OPEN) return;
 			ws.send(JSON.stringify({
@@ -63,7 +61,6 @@ export default function PickupNavigation() {
 			}))
 
 			navigate(`/active-ride/${id}`);
-	
 			alert('Ride started!');
 		} catch (error) {
 			console.error("error in start ride", error);

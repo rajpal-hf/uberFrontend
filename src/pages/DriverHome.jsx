@@ -429,7 +429,7 @@ const DriverHome = () => {
 			<div className="max-w-4xl mx-auto px-4 py-6">
 				{/* Current Ride Card */}
 				{currentRide && (
-					<div className="mb-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+					<div className="mb-6 bg-linear-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
 						<div className="flex items-center justify-between mb-4">
 							<h2 className="text-xl font-bold">Current Ride</h2>
 							<span className={`px-4 py-1 rounded-full text-sm font-semibold ${currentRide.status === 'accepted' ? 'bg-yellow-400 text-yellow-900' :
@@ -443,7 +443,7 @@ const DriverHome = () => {
 
 						<div className="space-y-3 mb-4">
 							<div className="flex items-start gap-3">
-								<MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
+								<MapPin className="w-5 h-5 mt-1 shrink-0" />
 								<div>
 									<p className="text-sm opacity-80">Pickup</p>
 									<p className="font-medium">{currentRide.pickupLocation.address || `${currentRide.pickupLocation.lat.toFixed(4)}, ${currentRide.pickupLocation.lng.toFixed(4)}`}</p>
@@ -451,7 +451,7 @@ const DriverHome = () => {
 							</div>
 
 							<div className="flex items-start gap-3">
-								<Navigation className="w-5 h-5 mt-1 flex-shrink-0" />
+								<Navigation className="w-5 h-5 mt-1 shrink-0" />
 								<div>
 									<p className="text-sm opacity-80">Dropoff</p>
 									<p className="font-medium">{currentRide.dropoffLocation.address || `${currentRide.dropoffLocation.lat.toFixed(4)}, ${currentRide.dropoffLocation.lng.toFixed(4)}`}</p>

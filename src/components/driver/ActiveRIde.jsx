@@ -2,6 +2,7 @@ import React, { useState, useEffect, use } from 'react';
 import { Navigation, MapPin, Flag, User, Phone, Clock, DollarSign, MessageSquare, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getSocket } from '../../utils/webSocket/ws';
 
 export default function ActiveRidePage() {
 	const [currentTime, setCurrentTime] = useState(new Date());
@@ -17,7 +18,6 @@ export default function ActiveRidePage() {
 	useEffect(() => {
 		const fetchRideData = async () => {
 			try {
-				// Replace with your actual API endpoint
 				const {data} = await axios.get(`http://localhost:3000/ride/active-ride/${id}`, {
 					withCredentials: true	
 				});
@@ -97,34 +97,21 @@ export default function ActiveRidePage() {
 			const dropLat = position.coords.latitude;
 			const dropLng = position.coords.longitude;
 
-			// 2. Send to backend with dropoff DTO
-			const { data } = await axios.patch(
-				`http://localhost:3000/ride/complete/${id}`,
-				{
+			const ws = getSocket()
+			if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+			ws.send(JSON.stringify({
+				event: "ride:complete",	
+				data: {
+					rideId: id,
 					dropoffLocation: {
-						lat: dropLat,	
+						lat: dropLat,
 						lng: dropLng
 					}
-				},
-				{
-					withCredentials: true
 				}
-			);
+			}))
 
-
-			if (data.success) {
-				// 3. Redirect with combined data
-				navigate("/payment-verify", {
-					state: {
-						rideId: id,
-						finalFare: data.ride.fare,
-						finalDistance: data.ride.distance,
-						paymentOrderId: data.payment.orderId,
-						paymentAmount: data.payment.amount,
-						paymentCurrency: data.payment.currency
-					},
-				});
-			}
+	
 		} catch (err) {
 			console.error(err);
 			alert("Failed to complete ride. Try again.");

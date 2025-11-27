@@ -1,152 +1,48 @@
 import { useState, useEffect } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { connectWS } from '../../utils/webSocket/ws';
-
+import {  getSocket } from '../../utils/webSocket/ws';
 
 export default function LoadingPage() {
-	const { id } = useParams();
+	const { rideId } = useParams();
 	const location = useLocation();
-	const navigate = useNavigate();
 
-	// const rideId = id || location.state?.id || location.pathname.split['/'][-1];
-
-	const rideId = 
-		id ||
-		location.state?.id ||
+	const id =
+		rideId ||
+		location.state?.rideId ||
 		location.pathname.split('/').pop();
 
 	const [isLoading, setIsLoading] = useState(true);
-	const [progress, setProgress] = useState(0);
+	const [showCancel, setShowCancel] = useState(false); 
+
+
 
 	useEffect(() => {
-		if (isLoading) {
-			const interval = setInterval(() => {
-				setProgress(prev => {
-					if (prev >= 100) {
-						clearInterval(interval);
-						setIsLoading(false);
-						return 100;
-					}
-					return prev + 1;
-				});
-			}, 50);
+		const timer = setTimeout(() => {
+			setShowCancel(true);
+		}, 10000); 
 
-			return () => clearInterval(interval);
-		}
-	}, [isLoading]);
-
-
-
-		useEffect(() => {
-			const token = localStorage.getItem("token");
-	
-			connectWS(token, (event, data) => {
-	
-				if (event === "ride:started") {
-					
-				}
-				if (event === "ride:accepted") {
-					navigate(`/driver-info/${data._id}`)
-				}
-	
-				if (event === "ride:cancelled") {
-					alert("Driver cancelled the ride.");
-					navigate("/rider-home");
-				}
-				if (event === "ride:completed") {
-					navigate(`/payment/${rideId}`, {
-						state: { payment: data.payment }
-					});
-				}
-			});
-	
-	
-		}, []);
-
-	// useEffect(() => {
-	// 	const socket = getSocket();
-
-	// 	if (!socket) return;
-
-	// 	const handleMessage = (msg) => {
-	// 		const { event, data } = JSON.parse(msg.data);
-
-	// 		if (event === "ride:accepted") {
-	// 			console.log("Driver accepted!", data);
-
-	// 			navigate(`/driver-info/${data._id}`, {
-	// 				state: { rideId: data._id }
-	// 			});
-	// 		}
-
-	// 		if (event === "ride:cancelled") {
-	// 			console.log("Ride cancelled!", data);
-	// 			navigate('/rider-home');
-	// 		}
-	// 	};
-
-	// 	socket.addEventListener("message", handleMessage);
-
-	// 	return () => {
-	// 		socket.removeEventListener("message", handleMessage);
-	// 	};
-	// }, []);
-
-
-
-	const checkDriverFound = async () => {
-		try {
-			const { data } = await axios.get(
-				`http://localhost:3000/ride/driver/${rideId}`,
-				{ withCredentials: true }
-			);
-
-
-			if (data.success && data.ride) {
-				navigate(`/driver-info/${rideId}`, 
-					{
-						state: {
-							rideId: data.ride._id,
-						},
-					}	
-				);
-			}
-
-		} catch (error) {
-			console.log(error);
-			console.error( error);
-			return
-		}
-	};
-
-	useEffect(() => {
-		if (rideId) checkDriverFound();
+		return () => clearTimeout(timer);
 	}, []);
-
-	
 
 	const handleCancel = async () => {
 		try {
-			await axios.patch(`http://localhost:3000/ride/cancel/${rideId}`, {}, {withCredentials: true});
-			
-
+			console.log("hittinggggg")
+			const ws = getSocket();
+			if (ws && ws.readyState === WebSocket.OPEN) {
+				ws.send(JSON.stringify({
+					event: "ride:cancel",
+					data: { rideId : id }
+				}));
+			}
 			setIsLoading(false);
-			setProgress(0);
-
-			// optional redirect
-			navigate('/rider-home');
 		} catch (error) {
 			console.log(error);
 		}
 	};
 
-
-	
-
 	return (
-		<div className="min-h-screen flex flex-col gap-4  bg-linear-to-br from-gray-900 via-gray-800 to-black items-center justify-center">
+		<div className="min-h-screen flex flex-col gap-4 bg-linear-to-br from-gray-900 via-gray-800 to-black items-center justify-center">
 			<div className="text-center">
 				<div className="relative w-24 h-24 mx-auto mb-6">
 					<div className="absolute inset-0 border-4 border-gray-700 rounded-full"></div>
@@ -156,16 +52,15 @@ export default function LoadingPage() {
 				<p className="text-gray-400">Please wait while we load ride details</p>
 			</div>
 
+			{showCancel && (
 				<button
 					onClick={handleCancel}
-					className="w- flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg font-medium hover:bg-red-100 transition-colors border border-red-200"
+					className="flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg font-medium hover:bg-red-100 transition-colors border border-red-200"
 				>
 					<X className="w-5 h-5" />
 					Cancel
 				</button>
-
-			
+			)}
 		</div>
-		
 	);
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MapPin, Car, Bike, Truck } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { connectWS, getSocket } from "../../utils/webSocket/ws";
 
 export default function RideFareCalculator() {
 
@@ -32,25 +33,81 @@ export default function RideFareCalculator() {
 	const [result, setResult] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [id, setRideId] = useState(null);
 
 	const [gettingLocation, setGettingLocation] = useState(null);
 
+
+
+
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+
+		connectWS(token, (event, data) => {
+
+			
+			if (event === "ride:created") {
+				console.log("ride:created FE - Rider", data);
+
+				if (!data?.rideId) {
+					console.error("Invalid ride created WS event:", data);
+					return;
+				}
+
+				navigate(`/searching-driver/${data.rideId}`, {
+					state: { rideId: data.rideId }
+				});
+			}
+
+			if (event === "ride:accepted") {
+
+				navigate(`/driver-info/${data._id}`)
+			}
+
+			if (event === "ride:started") {
+				navigate(`/on-going-ride/${data.rideId}`);
+			}
+
+
+			if (event === "ride:cancelled") {
+				alert("Driver cancelled the ride.");
+				navigate("/rider-home");
+			}
+
+			if (event === "ride:completed") {
+				console.log("ride:completed FEeeee - Rider", data);
+				navigate(`/checkout/${data._id}`, {
+					state: { payment: data }
+				});
+			}
+		});
+
+
+	}, []);
 	
 
 
+	
 	const requestRide = async (mode) => {
 		try {
-			const { data } = await axios.post(
-				"http://localhost:3000/ride/request",
-				{
+		console.log("ride requested initate" 	)
+
+			const ws = getSocket()
+			if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+		await ws.send(JSON.stringify({
+				event: "ride:request",
+				data: {
 					vehicleType: mode,
 					pickupLocation,
 					dropoffLocation,
 					fare: result.estimatedFare[mode],
-				},
-				{withCredentials: true}
-			)
-			return data;
+				}
+			}))
+
+
+
+			console.log("ride requested done", 	)
 		}
 		catch(error) {
 			console.error("Error fetching token:", error);
@@ -62,18 +119,7 @@ export default function RideFareCalculator() {
 	const goToRequest = async(mode) => {
 
 		try {
-			const res = await requestRide(mode);
-
-			if (!res.success) {
-				console.log("res", res);
-				return 
-			}
-
-			navigate(`/searching-driver/${res.ride._id}`, {
-				state: {
-					rideId: res.rideId,
-				},
-			});
+			await requestRide(mode);
 		} catch (error) {
 			console.error("Error fetching token:", error);
 			return;
