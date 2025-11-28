@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, MessageCircle, MapPin, Navigation, Clock, AlertCircle, Shield, Share2, DollarSign, Car } from 'lucide-react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 export default function RideOngoingPage() {
 	const [rideTime, setRideTime] = useState(0);
@@ -10,53 +12,22 @@ export default function RideOngoingPage() {
 	const [rideData, setRideData] = useState(null);
 	const [driverData, setDriverData] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const {id} = useParams()
 
-	// Mock API response (replace with actual API call)
+
 	useEffect(() => {
-		// Simulating API call
+		
 		const fetchRideData = async () => {
 			try {
-				// Replace this with your actual API call
-				// const response = await fetch(`/api/rides/${rideId}`);
-				// const data = await response.json();
+			
 
-				const mockApiResponse = {
-					success: true,
-					ride: {
-						_id: '6928228f81b2dbea13269f51',
-						riderId: '6916ce9cb36e05d67a603474',
-						vehicleType: 'auto',
-						pickupLocation: {
-							lat: 30.6446336,
-							lng: 76.8114688,
-							address: 'Sigma City I, Zirakpur, Dera Bassi Tahsil, Sahibzada Ajit Singh Nagar, Punjab, 140603, India'
-						},
-						dropoffLocation: {
-							lat: 31.7685759,
-							lng: 74.8315603,
-							address: 'Amritsar, Punjab, India'
-						},
-						rideStatus: 'in_progress',
-						paymentStatus: 'pending',
-						fare: 3615.89,
-						distance: 0,
-						createdAt: '2025-11-27T10:06:07.569Z',
-						updatedAt: '2025-11-27T10:06:21.312Z',
-						driverId: '69143ad6eff4e159dcaa4c1a',
-						driverLocation: { lat: 30.6446336, lng: 76.8114688 }
-					},
-					driver: {
-						name: 'Rajesh Kumar',
-						phone: '+91 98765 43210',
-						rating: 4.8,
-						vehicleNumber: 'PB 65 AB 1234',
-						vehicleModel: 'Bajaj Auto',
-						vehicleColor: 'Yellow'
-					}
-				};
-
-				setRideData(mockApiResponse.ride);
-				setDriverData(mockApiResponse.driver);
+				console.log("RideOngoingPage - rideId:", id);
+				const { data } = await axios.get(`http://localhost:3000/ride/driver/${id}`, { withCredentials: true });
+				console.log("RideOngoingPage - fetched data:", data);	
+				console.log("RideOngoingPage - ride data:", data.ride);
+				console.log("RideOngoingPage - driver data:", data.ride.driverId);	
+				setRideData(data.ride);
+				setDriverData(data.ride.driver);
 				setLoading(false);
 			} catch (error) {
 				console.error('Error fetching ride data:', error);
@@ -80,7 +51,6 @@ export default function RideOngoingPage() {
 		}
 	}, [rideData]);
 
-	// Calculate distance between two coordinates (Haversine formula)
 	const calculateDistance = (lat1, lon1, lat2, lon2) => {
 		const R = 6371; // Earth's radius in km
 		const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -97,7 +67,7 @@ export default function RideOngoingPage() {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setRideTime(prev => prev + 1);
-			setEta(prev => Math.max(prev - 0.016, 0)); // Decrease ETA
+			setEta(prev => Math.max(prev - 0.016, 0)); 
 		}, 1000);
 
 		return () => clearInterval(interval);

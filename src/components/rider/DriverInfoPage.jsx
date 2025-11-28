@@ -15,6 +15,11 @@ export default function DriverInfoPage() {
 	const location = useLocation()
 
 
+
+	console.log("DriverInfoPage - id:", id);
+	console.log("DriverInfoPage - rideId:", rideId);
+
+
 	
 
 

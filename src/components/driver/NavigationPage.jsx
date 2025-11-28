@@ -17,7 +17,7 @@ export default function PickupNavigation() {
 		const fetchRideData = async () => {
 			try {
 				// Replace with your actual API endpoint
-				const { data } = 	await axios.get(`http://localhost:3000/ride/pickup-navigation/${id} `, {
+				const { data } = 	await axios.get(`http://localhost:3000/ride/pickup-navigation/${id}`, {
 					withCredentials: true
 				});
 

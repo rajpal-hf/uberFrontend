@@ -44,6 +44,7 @@ export default function DriverPanel() {
 				setRideRequests(prev => prev.filter(r => r._id !== data._id));
 			}
 			if (event === "ride:accepted") {
+				console.log("ride accepted FE - Driver", data);
 				navigate(`/pickup-navigation/${data._id}`);
 			}
 			if (event === "ride:completed") {

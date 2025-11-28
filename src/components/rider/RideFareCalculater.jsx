@@ -60,12 +60,14 @@ export default function RideFareCalculator() {
 			}
 
 			if (event === "ride:accepted") {
+				console.log("ride:accepted FE - Rider", data);
 
 				navigate(`/driver-info/${data._id}`)
 			}
 
 			if (event === "ride:started") {
-				navigate(`/on-going-ride/${data.rideId}`);
+				console.log("ride:started FE - Rider", data);
+				navigate(`/on-going-ride/${data._id}`);
 			}
 
 

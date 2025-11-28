@@ -47,35 +47,87 @@ export default function RidePayment() {
 		});
 	};
 
-	const handlePayment = async () => {
-		const res = await loadRazorpay();
-		if (!res) {
-			alert('Razorpay SDK failed to load. Please check your internet.');
-			return;
-		}
+	// const handlePayment = async () => {
+	// 	const res = await loadRazorpay();
+	// 	if (!res) {
+	// 		alert('Razorpay SDK failed to load. Please check your internet.');
+	// 		return;
+	// 	}
 
-		setPaymentStatus('processing');
+	// 	setPaymentStatus('processing');
+
+	// 	const options = {
+	// 		key: 'rzp_test_RcOumgU4UtUrop',
+	// 		amount: rideDetails.total * 100,
+	// 		currency: "INR",
+	// 		name: "Ride Service",
+	// 		description: "Ride Payment",
+	// 		handler: async function (response) {
+	// 			console.log("Payment success", response);
+
+	// 			await axios.post(
+	// 				`${process.env.REACT_APP_BASE_URL}/ride/payment-complete/${rideData._id}`,
+	// 				{
+	// 					razorpay_payment_id: response.razorpay_payment_id
+	// 				},
+	// 				{
+	// 					headers: { Authorization: localStorage.getItem("token") }
+	// 				}
+	// 			);
+
+	// 			setPaymentStatus('success');
+	// 		},
+	// 		theme: { color: "#3B82F6" }
+	// 	};
+
+	// 	const paymentObject = new window.Razorpay(options);
+	// 	paymentObject.open();
+	// };
+	
+	const handlePayment = async () => {
+		const sdk = await loadRazorpay();
+		if (!sdk) return alert("Failed to load Razorpay!");
+
+		setPaymentStatus("processing");
+
+		// 1️⃣ Create Razorpay Order
+		const orderRes = await axios.post(
+			`http://localhost:3000/payment/create-order`,
+			{ amount: rideDetails.total },
+			{
+				headers: { Authorization: localStorage.getItem("token") }
+			}
+		);
+
+		const { orderId, amount, currency } = orderRes.data;
 
 		const options = {
-			key: 'rzp_test_RcOumgU4UtUrop', // replace
-			amount: rideDetails.total * 100,
-			currency: "INR",
+			key: "rzp_test_RcOumgU4UtUrop",
+			amount,
+			currency,
 			name: "Ride Service",
 			description: "Ride Payment",
+			order_id: orderId, // REQUIRED
+
 			handler: async function (response) {
-				console.log("Payment success", response);
+				console.log("Payment Success:", response);
 
 				await axios.post(
-					`${process.env.REACT_APP_BASE_URL}/ride/payment-complete/${rideData._id}`,
+					`http://localhost:3000/payment/verify`,
 					{
-						razorpay_payment_id: response.razorpay_payment_id
+						razorpay_order_id: response.razorpay_order_id,
+						razorpay_payment_id: response.razorpay_payment_id,
+						razorpay_signature: response.razorpay_signature,
+						rideId: rideData._id,
+						riderId: rideData.riderId,
+						amount,
 					},
 					{
 						headers: { Authorization: localStorage.getItem("token") }
 					}
 				);
 
-				setPaymentStatus('success');
+				setPaymentStatus("success");
 			},
 			theme: { color: "#3B82F6" }
 		};
@@ -84,7 +136,8 @@ export default function RidePayment() {
 		paymentObject.open();
 	};
 
-	// WAIT for rideDetails to load 👇
+
+	// WAIT for rideDetails to load 
 	if (!rideDetails) return <p>Loading...</p>;
 
 	// SUCCESS SCREEN SAME AS BEFORE...
